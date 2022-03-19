@@ -36,6 +36,17 @@ services:
     volumes:
       - ./scripts/db:/docker-entrypoint-initdb.d/
 
+  test:
+    image: golang:1.17
+    depends_on:
+      - accountapi
+    environment:
+      - API=http://accountapi:8080
+    volumes:
+      - ./:/app/
+    working_dir: /app
+    command: go test -v ./...
+
   vault:
     image: vault:1.6.3
     environment:
