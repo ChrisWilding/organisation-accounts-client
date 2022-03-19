@@ -37,7 +37,7 @@ services:
       - ./scripts/db:/docker-entrypoint-initdb.d/
 
   test:
-    image: golang:1.17
+    image: golang:1.18
     depends_on:
       - accountapi
     environment:
