@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 )
 
 var acceptHeader = "application/vnd.api+json"
@@ -55,9 +57,36 @@ func (a *Accounts) Create(ctx context.Context, accountData *AccountData) (*Accou
 	return out.Data, nil
 }
 
-// func (a *Accounts) Delete() (bool, error) {
-// 	return true, nil
-// }
+var ErrAccountNotFound = errors.New("account does not exist")
+var ErrAccountVersionIncorrect = errors.New("account version incorrect")
+
+func (a *Accounts) Delete(ctx context.Context, id string, version int) (bool, error) {
+	url := a.c.baseURL + "/v1/organisation/accounts/" + id
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
+	if err != nil {
+		return false, err
+	}
+
+	q := req.URL.Query()
+	q.Add("version", strconv.Itoa(version))
+	req.URL.RawQuery = q.Encode()
+
+	req.Header.Set("Accept", acceptHeader)
+
+	res, err := a.c.HTTPClient.Do(req)
+	if err != nil {
+		return false, err
+	}
+
+	switch res.StatusCode {
+	case http.StatusNotFound:
+		return false, ErrAccountNotFound
+	case http.StatusConflict:
+		return false, ErrAccountVersionIncorrect
+	default:
+		return res.StatusCode == http.StatusNoContent, nil
+	}
+}
 
 func (a *Accounts) Fetch(ctx context.Context, id string) (*AccountData, error) {
 	url := a.c.baseURL + "/v1/organisation/accounts/" + id
