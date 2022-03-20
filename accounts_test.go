@@ -3,11 +3,20 @@ package oac
 import (
 	"context"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
+
+func testClient() Client {
+	var testBaseURL = os.Getenv("FORM3_BASE_URL")
+	if testBaseURL == "" {
+		testBaseURL = "http://localhost:8080"
+	}
+	return NewClient(http.DefaultClient, WithBaseURL(testBaseURL))
+}
 
 var name = uuid.New().String()
 var attrs = AccountAttributes{
@@ -27,7 +36,7 @@ var acc = AccountData{
 }
 
 func TestCreateAccount(t *testing.T) {
-	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+	c := testClient()
 
 	res, err := c.Accounts.Create(context.Background(), &acc)
 
@@ -46,8 +55,7 @@ func TestCreateAccount(t *testing.T) {
 }
 
 func TestCreateAccountWithSameID(t *testing.T) {
-	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
-
+	c := testClient()
 	res, err := c.Accounts.Create(context.Background(), &acc)
 
 	assert.Nil(t, res)
@@ -55,7 +63,7 @@ func TestCreateAccountWithSameID(t *testing.T) {
 }
 
 func TestCreateAccountWithMissingMandatoryFields(t *testing.T) {
-	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+	c := testClient()
 
 	var name = uuid.New().String()
 	var attrs = AccountAttributes{
@@ -81,7 +89,7 @@ func TestCreateAccountWithMissingMandatoryFields(t *testing.T) {
 }
 
 func TestFetchAccount(t *testing.T) {
-	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+	c := testClient()
 
 	res, err := c.Accounts.Fetch(context.Background(), acc.ID)
 
@@ -100,7 +108,7 @@ func TestFetchAccount(t *testing.T) {
 }
 
 func TestFetchAccountWhenNotFound(t *testing.T) {
-	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+	c := testClient()
 
 	res, err := c.Accounts.Fetch(context.Background(), uuid.New().String())
 	assert.Nil(t, res)
@@ -108,7 +116,7 @@ func TestFetchAccountWhenNotFound(t *testing.T) {
 }
 
 func TestDeleteAccountWhenNotFound(t *testing.T) {
-	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+	c := testClient()
 
 	res, err := c.Accounts.Delete(context.Background(), uuid.New().String(), 0)
 
@@ -117,7 +125,7 @@ func TestDeleteAccountWhenNotFound(t *testing.T) {
 }
 
 func TestDeleteAccountWhenVersionIsIncorrect(t *testing.T) {
-	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+	c := testClient()
 
 	res, err := c.Accounts.Delete(context.Background(), acc.ID, 999)
 
@@ -126,7 +134,7 @@ func TestDeleteAccountWhenVersionIsIncorrect(t *testing.T) {
 }
 
 func TestDeleteAccount(t *testing.T) {
-	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+	c := testClient()
 
 	res, err := c.Accounts.Delete(context.Background(), acc.ID, 0)
 

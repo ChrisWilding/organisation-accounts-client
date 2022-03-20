@@ -38,14 +38,15 @@ services:
 
   test:
     image: golang:1.18
+    restart: on-failure
     depends_on:
       - accountapi
-    environment:
-      - API=http://accountapi:8080
     volumes:
       - ./:/app/
     working_dir: /app
     command: go test -v ./...
+    environment:
+      - FORM3_BASE_URL=http://accountapi:8080
 
   vault:
     image: vault:1.6.3
