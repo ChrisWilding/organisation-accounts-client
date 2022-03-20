@@ -24,6 +24,9 @@ jobs:
         with:
           go-version: 1.18
 
+      - name: Docker
+        run: docker compose up accountapi
+
       - name: Build
         run: go build -v ./...
 
