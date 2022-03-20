@@ -24,6 +24,9 @@ type accountRes struct {
 	Data *AccountData `json:"data,omitempty"`
 }
 
+var ErrAccountNotFound = errors.New("account does not exist")
+var ErrAccountVersionIncorrect = errors.New("account version incorrect")
+
 // Create a new account using the provided AccountData.
 func (a *Accounts) Create(ctx context.Context, accountData *AccountData) (*AccountData, error) {
 	var ar = accountReq{
@@ -56,9 +59,6 @@ func (a *Accounts) Create(ctx context.Context, accountData *AccountData) (*Accou
 
 	return out.Data, nil
 }
-
-var ErrAccountNotFound = errors.New("account does not exist")
-var ErrAccountVersionIncorrect = errors.New("account version incorrect")
 
 func (a *Accounts) Delete(ctx context.Context, id string, version int) (bool, error) {
 	url := a.c.baseURL + "/v1/organisation/accounts/" + id
@@ -101,6 +101,10 @@ func (a *Accounts) Fetch(ctx context.Context, id string) (*AccountData, error) {
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusNotFound {
+		return nil, ErrAccountNotFound
+	}
 
 	var out accountRes
 	err = json.NewDecoder(res.Body).Decode(&out)
