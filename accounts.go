@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+var acceptHeader = "application/vnd.api+json"
+
 // Accounts groups functionality to create, delete and fetch AccountData.
 type Accounts struct {
 	c *Client
@@ -36,7 +38,7 @@ func (a *Accounts) Create(ctx context.Context, accountData *AccountData) (*Accou
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Accept", "application/vnd.api+json")
+	req.Header.Set("Accept", acceptHeader)
 
 	res, err := a.c.HTTPClient.Do(req)
 	if err != nil {
@@ -57,6 +59,25 @@ func (a *Accounts) Create(ctx context.Context, accountData *AccountData) (*Accou
 // 	return true, nil
 // }
 
-// func (a *Accounts) Fetch() (*Account, error) {
-// 	return nil, nil
-// }
+func (a *Accounts) Fetch(ctx context.Context, id string) (*AccountData, error) {
+	url := a.c.baseURL + "/v1/organisation/accounts/" + id
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", acceptHeader)
+
+	res, err := a.c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	var out accountRes
+	err = json.NewDecoder(res.Body).Decode(&out)
+	if err != nil {
+		return nil, err
+	}
+
+	return out.Data, nil
+}
