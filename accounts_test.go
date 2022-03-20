@@ -64,6 +64,14 @@ func TestFetchAccount(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestFetchAccountWhenNotFound(t *testing.T) {
+	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+
+	res, err := c.Accounts.Fetch(context.Background(), uuid.New().String())
+	assert.Nil(t, res)
+	assert.ErrorIs(t, err, ErrAccountNotFound)
+}
+
 func TestDeleteAccountWhenNotFound(t *testing.T) {
 	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
 
