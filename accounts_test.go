@@ -63,3 +63,30 @@ func TestFetchAccount(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestDeleteAccountWhenNotFound(t *testing.T) {
+	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+
+	res, err := c.Accounts.Delete(context.Background(), uuid.New().String(), 0)
+
+	assert.False(t, res)
+	assert.ErrorIs(t, err, ErrAccountNotFound)
+}
+
+func TestDeleteAccountWhenVersionIsIncorrect(t *testing.T) {
+	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+
+	res, err := c.Accounts.Delete(context.Background(), acc.ID, 999)
+
+	assert.False(t, res)
+	assert.ErrorIs(t, err, ErrAccountVersionIncorrect)
+}
+
+func TestDeleteAccount(t *testing.T) {
+	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+
+	res, err := c.Accounts.Delete(context.Background(), acc.ID, 0)
+
+	assert.True(t, res)
+	assert.Nil(t, err)
+}
