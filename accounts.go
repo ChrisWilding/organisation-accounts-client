@@ -26,6 +26,8 @@ type accountRes struct {
 
 var ErrAccountNotFound = errors.New("account does not exist")
 var ErrAccountVersionIncorrect = errors.New("account version incorrect")
+var ErrAccountIsDuplicate = errors.New("account is duplicate")
+var ErrAccountBadRequest = errors.New("bad account creation request")
 
 // Create a new account using the provided AccountData.
 func (a *Accounts) Create(ctx context.Context, accountData *AccountData) (*AccountData, error) {
@@ -50,6 +52,13 @@ func (a *Accounts) Create(ctx context.Context, accountData *AccountData) (*Accou
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusConflict {
+		return nil, ErrAccountIsDuplicate
+	}
+	if res.StatusCode == http.StatusBadRequest {
+		return nil, ErrAccountBadRequest
+	}
 
 	var out accountRes
 	err = json.NewDecoder(res.Body).Decode(&out)

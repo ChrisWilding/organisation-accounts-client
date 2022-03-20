@@ -45,6 +45,41 @@ func TestCreateAccount(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestCreateAccountWithSameID(t *testing.T) {
+	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+
+	res, err := c.Accounts.Create(context.Background(), &acc)
+
+	assert.Nil(t, res)
+	assert.ErrorIs(t, err, ErrAccountIsDuplicate)
+}
+
+func TestCreateAccountWithMissingMandatoryFields(t *testing.T) {
+	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
+
+	var name = uuid.New().String()
+	var attrs = AccountAttributes{
+		BankID:       "400300",
+		BankIDCode:   "GBDSC",
+		BaseCurrency: "GBP",
+		Bic:          "NWBKGB22",
+		Country:      nil,
+		Name:         []string{name},
+	}
+
+	var acc = AccountData{
+		Attributes:     &attrs,
+		ID:             uuid.New().String(),
+		OrganisationID: uuid.New().String(),
+		Type:           "accounts",
+	}
+
+	res, err := c.Accounts.Create(context.Background(), &acc)
+
+	assert.Nil(t, res)
+	assert.ErrorIs(t, err, ErrAccountBadRequest)
+}
+
 func TestFetchAccount(t *testing.T) {
 	c := NewClient(http.DefaultClient, WithBaseURL("http://localhost:8080"))
 
