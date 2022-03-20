@@ -40,6 +40,6 @@ I have tried to follow some of the conventions I have seen in other SDK's or wit
 
 Given more time I would have liked to implement logging similar to stripe-go which has a logging interface that can accept either a Logrus logger or Zap's SugaredLogger.
 
-I would normally except tests to run independent of any other services and not make network calls (particullary in CI). In Java I would often use Test Containers and WireMock. However, the instructions explicitly state to the provided fake API. As I have re-used test data between tests that has resulted in some dependencies between tests and on the ordering of tests.
+I would normally expect tests to run independent of any other services and not make network calls (particularly in CI). In Java I would often use Test Containers and WireMock. However, the instructions explicitly state to the provided fake API. As I have re-used test data between tests that has resulted in some dependencies between tests and on the ordering of tests.
 
 I have used the initially provided model.go as is, and have not added mappings for any additional fields returned by the fake API e.g. created_on and modified_on.
