@@ -69,6 +69,7 @@ func (a *Accounts) Create(ctx context.Context, accountData *AccountData) (*Accou
 	return out.Data, nil
 }
 
+// Delete the account with the given id and version.
 func (a *Accounts) Delete(ctx context.Context, id string, version int) (bool, error) {
 	url := a.c.baseURL + "/v1/organisation/accounts/" + id
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
@@ -97,6 +98,7 @@ func (a *Accounts) Delete(ctx context.Context, id string, version int) (bool, er
 	}
 }
 
+// Fetch the account with the given id.
 func (a *Accounts) Fetch(ctx context.Context, id string) (*AccountData, error) {
 	url := a.c.baseURL + "/v1/organisation/accounts/" + id
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
